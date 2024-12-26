@@ -103,7 +103,7 @@ export default function Main() {
               aria-label="Seed phrase input"
             />
             <Button
-              onClick={()=>setMnemonicHandler}
+              onClick={setMnemonicHandler}
               className="bg-zinc-900 text-gray-300 h-12 hover:bg-zinc-800 w-full sm:w-auto"
             >
               Generate
