@@ -5,15 +5,25 @@ import Form from ".././components/form";
 import Form1 from ".././components/form1";
 import Mnemonics from ".././components/mnemonics";
 import { generateMnemonic } from "bip39";
-import {  useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Main() {
   const { toast } = useToast();
-  const [mnemonic, setMnemonic] = useState<string>(localStorage.getItem("mnemonic") || "");
+  const [mnemonic, setMnemonic] = useState<string>("");
   const [dummy, setDummy] = useState<string>("");
+
+  // Load mnemonic from localStorage on the client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedMnemonic = localStorage.getItem("mnemonic");
+      if (storedMnemonic) {
+        setMnemonic(storedMnemonic);
+      }
+    }
+  }, []);
 
   function setMnemonicHandler() {
     const trimmedDummy = dummy.trim().replace(/\s+/g, " ");
@@ -93,7 +103,7 @@ export default function Main() {
               aria-label="Seed phrase input"
             />
             <Button
-              onClick={setMnemonicHandler}
+              onClick={()=>setMnemonicHandler}
               className="bg-zinc-900 text-gray-300 h-12 hover:bg-zinc-800 w-full sm:w-auto"
             >
               Generate
@@ -104,3 +114,4 @@ export default function Main() {
     </div>
   );
 }
+
