@@ -11,35 +11,31 @@ import { Eye, EyeOff, PlusIcon } from "lucide-react";
 import Avatar from "boring-avatars";
 
 export default function Form1({ mnemonic }: { mnemonic: string }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [publicKeys, setPublicKeys] = useState<string[]>([]);
   const [privateKeys, setPrivateKeys] = useState<string[]>([]);
   const [visibleKeys, setVisibleKeys] = useState<boolean[]>([]);
 
   const addWallet = async () => {
-    try {
-      const seed = await mnemonicToSeed(mnemonic);
-      const path = `m/44'/501'/${currentIndex}'/0'`;
-      const derivedSeed = derivePath(path, seed.toString("hex")).key;
-      const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-      const privateKey = secret.slice(0, 32);
-      const keypair = Keypair.fromSecretKey(secret);
+    const seed = await mnemonicToSeed(mnemonic);
+    const path = `m/44'/501'/${currentIndex}'/0'`;
+    const derivedSeed = derivePath(path, seed.toString("hex")).key;
+    const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
+    const privateKey = secret.slice(0, 32);
+    const keypair = Keypair.fromSecretKey(secret);
 
-      setPublicKeys((prev) => [...prev, keypair.publicKey.toBase58()]);
-      setPrivateKeys((prev) => [
-        ...prev,
-        Buffer.from(privateKey).toString("hex"),
-      ]);
-      setCurrentIndex((prev) => prev + 1);
-      setVisibleKeys((prev) => [...prev, false]);
-    } catch (error) {
-      console.error("Error generating wallet:", error);
-    }
+    setPublicKeys([...publicKeys, keypair.publicKey.toBase58()]);
+    setPrivateKeys([
+      ...privateKeys,
+      Buffer.from(privateKey).toString("hex"),
+    ]);
+    setCurrentIndex(currentIndex + 1);
+    setVisibleKeys([...visibleKeys, false]);
   };
 
   useEffect(() => {
     addWallet();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleKeyVisibility = (index: number) => {
@@ -64,7 +60,7 @@ export default function Form1({ mnemonic }: { mnemonic: string }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 w-full">
         {publicKeys.map((publicKey, index) => (
-          <Card className="bg-black px-2 sm:px-3 shadow-lg" key={publicKey}>
+          <Card className="bg-black px-2 sm:px-3 shadow-lg" key={index}>
             <CardHeader className="pb-1 sm:pb-2 px-1">
               <CardTitle className="flex items-center justify-start gap-2 sm:gap-3">
                 <Avatar
