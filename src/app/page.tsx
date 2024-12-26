@@ -1,101 +1,102 @@
-import Image from "next/image";
+"use client";
+
+import { Pizza, Trash } from "lucide-react";
+import Form from "./components/form";
+import Form1 from "./components/form1";
+import Mnemonics from "./components/mnemonics";
+import { generateMnemonic } from "bip39";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { toast } = useToast();
+  const [mnemonic, setMnemonic] = useState<string>(
+    localStorage.getItem("mnemonic") || ""
+  );
+  const [dummy, setDummy] = useState<string>("");
+  function setMnemonicHandler() {
+    const trimmedDummy = dummy.trim().replace(/\s+/g, " ");
+    if (
+      trimmedDummy.split(" ").length === 12 ||
+      trimmedDummy.split(" ").length === 24
+    ) {
+      localStorage.setItem("mnemonic", trimmedDummy);
+      setMnemonic(trimmedDummy);
+    } else if (trimmedDummy === "") {
+      const mnemonic = generateMnemonic();
+      localStorage.setItem("mnemonic", mnemonic);
+      setMnemonic(mnemonic);
+    } else {
+      toast({
+        description: "Invalid Seed Phrase",
+        type: "foreground",
+        duration: 3000,
+      });
+    }
+  }
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  function handleDeleteWallet() {
+    localStorage.removeItem("mnemonic");
+    setMnemonic("");
+    setDummy("");
+  }
+  return (
+    <div className="w-[100%] h-[100vh] gap-3 p-5 flex flex-col justify-start">
+      <div className="w-[100%] flex justify-between items-center">
+        <div className="flex justify-start mb-7 my-5 items-center gap-3 w-[100%]">
+          <Pizza size={30} />
+          <p className="text-2xl font-semibold">furiyash</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {mnemonic && (
+          <Button
+            className="bg-red-400 w-fit text-base hover:bg-red-300 "
+            onClick={handleDeleteWallet}
+          >
+            {" "}
+            <p className="sm:block hidden">Delete Wallet</p>
+            <Trash size={20} />
+          </Button>
+        )}
+      </div>
+      {mnemonic && (
+        <>
+          <Mnemonics mnemonic={mnemonic} />
+          <div className="w-[100%] flex-1 flex-col flex gap-5 py-3">
+            <Form mnemonic={mnemonic} />
+            <Form1 mnemonic={mnemonic} />
+          </div>
+        </>
+      )}
+
+      {!mnemonic && (
+        <div className="flex flex-col gap-4 sm:gap-5 mt-4 sm:mt-7 text-gray-300">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold">
+            Enter a seed phrase
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-400">
+            Make sure it&apos;s a 12 words phrase or just click generate to get
+            a random one.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-5">
+            <Input
+              className="w-full sm:w-[60%] py-4 sm:py-6 rounded-xl"
+              type="password"
+              placeholder="Enter seed phrase"
+              value={dummy}
+              onChange={(e) => setDummy(e.target.value)}
+              aria-label="Seed phrase input"
+            />
+            <Button
+              onClick={setMnemonicHandler}
+              className="bg-zinc-900 text-gray-300 h-12 hover:bg-zinc-800 w-full sm:w-auto"
+            >
+              Generate
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
